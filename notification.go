@@ -36,8 +36,8 @@ func (u NotificationUrgency) asHint() map[string]dbus.Variant {
 //	func main() {
 //		critical := notify.New("prog", "", "", "critical-icon.png", time.Duration(0), notify.CriticalUrgency)
 //		boring := notify.New("prog", "", "", "low-icon.png", 1 * time.Second, notify.LowUrgency)
-//		boring.SendMsg("Nothing is happening... boring!", "")
-//		critical.SendMsg("Your computer is on fire!", "Here is what you should do:\n ...")
+//		boring.ReaceMsg("Nothing is happening... boring!", "")
+//		critical.RemplaceMsg("Your computer is on fire!", "Here is what you should do:\n ...")
 //	}
 //
 type Notification struct {
@@ -61,47 +61,35 @@ type Notification struct {
 	// Urgency determines the urgency of the notification, which can be one of
 	// LowUrgency, NormalUrgency, and CriticalUrgency.
 	Urgency NotificationUrgency
+
+	// Id is the ID of the notification. It is 0 initially, and will be
+	// updated when calling Send or one of the Replace methods.
+	Id uint32
 }
 
 // New returns a pointer to a new Notification.
 func New(name, summary, body, icon string, timeout time.Duration, urgency NotificationUrgency) *Notification {
-	return &Notification{name, summary, body, icon, timeout, urgency}
+	return &Notification{name, summary, body, icon, timeout, urgency, 0}
 }
 
-// Send sends the notification n as it is, and returns the ID and err, possibly
-// nil.
-func (n Notification) Send() (id uint32, err error) {
-	return notify(n.Name, n.Summary, n.Body, n.IconPath, 0, nil, n.Urgency.asHint(), n.timeoutInMS())
-}
-
-// SendMsg is identical to notify.SendMsg, except that the rest of the values
-// come from n.
-func (n Notification) SendMsg(summary, body string) (id uint32, err error) {
-	return notify(n.Name, summary, body, n.IconPath, 0, nil, n.Urgency.asHint(), n.timeoutInMS())
-}
-
-// SendUrgentMsg is identical to notify.SendUrgentMsg, except that the rest of
-// the values come from n.
-func (n Notification) SendUrgentMsg(summary, body string, urgency NotificationUrgency) (id uint32, err error) {
-	return notify(n.Name, summary, body, n.IconPath, 0, nil, urgency.asHint(), n.timeoutInMS())
-}
-
-// Replace replaces the notification with the ID id as it is, and returns the
-// new ID and an error if one occured.
-func (n Notification) Replace(id uint32) (newID uint32, err error) {
-	return notify(n.Name, n.Summary, n.Body, n.IconPath, id, nil, n.Urgency.asHint(), n.timeoutInMS())
+// Send sends the notification n as it is, and returns an err, possibly nil.
+func (n Notification) Send() (err error) {
+	n.Id, err = notify(n.Name, n.Summary, n.Body, n.IconPath, n.Id, nil, n.Urgency.asHint(), n.timeoutInMS())
+	return err
 }
 
 // ReplaceMsg is identical to notify.ReplaceMsg, except that the rest of the
 // values come from n.
-func (n Notification) ReplaceMsg(id uint32, summary, body string) (newID uint32, err error) {
-	return notify(n.Name, summary, body, n.IconPath, id, nil, n.Urgency.asHint(), n.timeoutInMS())
+func (n Notification) ReplaceMsg(summary, body string) (err error) {
+	n.Summary, n.Body = summary, body
+	return n.Send()
 }
 
 // ReplaceUrgentMsg is identical to notify.ReplaceUrgentMsg, except that the
 // rest of the values come from n.
-func (n Notification) ReplaceUrgentMsg(id uint32, summary, body string, urgency NotificationUrgency) (newID uint32, err error) {
-	return notify(n.Name, summary, body, n.IconPath, id, nil, urgency.asHint(), n.timeoutInMS())
+func (n Notification) ReplaceUrgentMsg(summary, body string, urgency NotificationUrgency) (err error) {
+	n.Summary, n.Body, n.Urgency = summary, body, urgency
+	return n.Send()
 }
 
 // timeoutInMS returns Timeout in milliseconds.

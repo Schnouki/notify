@@ -93,14 +93,14 @@ func SetUrgency(urgency NotificationUrgency) { note.Urgency = urgency }
 // notification ID and an error, possibly nil. It takes all other values from
 // the implicit notification object.
 func SendMsg(summary, body string) (id uint32, err error) {
-	return note.SendMsg(summary, body)
+	return SendUrgentMsg(summary, body, note.Urgency)
 }
 
 // SendUrgentMsg sends the summary and the body as a notification with the
 // urgency of urgency, and returns a unique notification ID and an error,
 // possibly nil. Otherwise it is like SendMsg.
 func SendUrgentMsg(summary, body string, urgency NotificationUrgency) (id uint32, err error) {
-	return note.SendUrgentMsg(summary, body, urgency)
+	return notify(note.Name, summary, body, note.IconPath, 0, nil, urgency.asHint(), note.timeoutInMS())
 }
 
 // ReplaceMsg replaces the already existing notification with the ID id with
@@ -111,12 +111,12 @@ func SendUrgentMsg(summary, body string, urgency NotificationUrgency) (id uint32
 // such as another urgency, these are also replaced by the defaults in the
 // implicit notification!
 func ReplaceMsg(id uint32, summary, body string) (newID uint32, err error) {
-	return note.ReplaceMsg(id, summary, body)
+	return ReplaceUrgentMsg(id, summary, body, note.Urgency)
 }
 
 // ReplaceUrgentMsg replaces the already existing notification with the ID id
 // with summary and body and urgency, returning the new ID and an error if it
 // fails. It takes all other values from the implicit notification object.
 func ReplaceUrgentMsg(id uint32, summary, body string, urgency NotificationUrgency) (newID uint32, err error) {
-	return note.ReplaceUrgentMsg(id, summary, body, urgency)
+	return notify(note.Name, summary, body, note.IconPath, id, nil, urgency.asHint(), note.timeoutInMS())
 }
