@@ -36,8 +36,8 @@ func (u NotificationUrgency) asHint() map[string]dbus.Variant {
 //	func main() {
 //		critical := notify.New("prog", "", "", "critical-icon.png", time.Duration(0), notify.CriticalUrgency)
 //		boring := notify.New("prog", "", "", "low-icon.png", 1 * time.Second, notify.LowUrgency)
-//		boring.ReaceMsg("Nothing is happening... boring!", "")
-//		critical.RemplaceMsg("Your computer is on fire!", "Here is what you should do:\n ...")
+//		boring.ReplaceMsg("Nothing is happening... boring!", "")
+//		critical.ReplaceMsg("Your computer is on fire!", "Here is what you should do:\n ...")
 //	}
 //
 type Notification struct {
